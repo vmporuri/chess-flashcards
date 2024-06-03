@@ -29,10 +29,10 @@ def test_convert_pgn_to_game() -> None:
     actual = find_mistakes(sample_game)
     expected_timestamps = [1717359176000] * len(actual)
     expected_fens = [
-        "r1bqkbnr/ppp1pppp/2n5/3p4/3P1B2/2N5/PPP1PPPP/R2QKBNR b",
-        "r1bqkb1r/ppp1pppp/2n2n2/1N1p4/3P1B2/8/PPP1PPPP/R2QKBNR b",
-        "r1bqkb1r/ppN2ppp/2n1pn2/3p4/3P1B2/8/PPP1PPPP/R2QKBNR b",
-        "3r2k1/p4ppp/b3p3/Q2p4/3Pn3/1P2P3/P1P3PP/R3R1K1 b",
+        "r1bqkbnr/ppp1pppp/2n5/3p4/3P1B2/2N5/PPP1PPPP/R2QKBNR b KQkq - 3 3",
+        "r1bqkb1r/ppp1pppp/2n2n2/1N1p4/3P1B2/8/PPP1PPPP/R2QKBNR b KQkq - 5 4",
+        "r1bqkb1r/ppN2ppp/2n1pn2/3p4/3P1B2/8/PPP1PPPP/R2QKBNR b KQkq - 0 5",
+        "3r2k1/p4ppp/b3p3/Q2p4/3Pn3/1P2P3/P1P3PP/R3R1K1 b - - 6 21",
     ]
     expected_solutions = [
         "a7a6",
