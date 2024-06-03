@@ -1,10 +1,9 @@
 import io
-from typing import Annotated, List
+from typing import Annotated
 
 import chess.pgn
-from pydantic import BaseModel, Field, conint
-
 import src.time_utils as time_utils
+from pydantic import BaseModel, Field, conint
 
 
 class Position(BaseModel):
@@ -12,6 +11,13 @@ class Position(BaseModel):
     fen: str = Field(
         pattern=r"^((?:[1-8PNBRQKpnbrqk]+\/){7}[1-8PNBRQKpnbrqk]+) ([wb]) (K?Q?k?q?|-) ([a-h][1-8]|-) (\d+) (\d+)$"
     )
+    solution: str = Field(pattern=r"^([a-h][1-8]){2}$")
+
+
+class BoardState(BaseModel):
+    timestamp: Annotated[int, conint(ge=1356998400070)]
+    board: list[list[str]]
+    turn: str = Field(pattern=r"[b|w]")
     solution: str = Field(pattern=r"^([a-h][1-8]){2}$")
 
 
@@ -23,7 +29,7 @@ def convert_pgn_to_game(pgn: str) -> chess.pgn.Game:
     return game
 
 
-def find_mistakes(pgn: str) -> List[Position]:
+def find_mistakes(pgn: str) -> list[Position]:
     game = convert_pgn_to_game(pgn)
     timestamp = time_utils.convert_utc_to_unix(
         game.headers["UTCDate"], game.headers["UTCTime"]
@@ -44,3 +50,13 @@ def find_mistakes(pgn: str) -> List[Position]:
         prev_move = curr_move
         curr_move = curr_move.next()
     return mistakes
+
+
+def get_board(pos: Position) -> BoardState:
+    timestamp = pos.timestamp
+    solution = pos.solution
+    board: list[list[str]] = [
+        row.split(" ") for row in str(chess.Board(pos.fen)).split("\n")
+    ]
+    turn = pos.fen.split()[1]
+    return BoardState(timestamp=timestamp, board=board, turn=turn, solution=solution)

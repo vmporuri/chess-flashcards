@@ -1,4 +1,4 @@
-from src.chess_utils import find_mistakes
+from src.chess_utils import find_mistakes, get_board
 
 
 sample_game = """
@@ -25,7 +25,7 @@ sample_game = """
 """
 
 
-def test_convert_pgn_to_game() -> None:
+def test_find_mistakes() -> None:
     actual = find_mistakes(sample_game)
     expected_timestamps = [1717359176000] * len(actual)
     expected_fens = [
@@ -45,3 +45,52 @@ def test_convert_pgn_to_game() -> None:
         assert actual[i].timestamp == expected_timestamps[i]
         assert actual[i].fen == expected_fens[i]
         assert actual[i].solution == expected_solutions[i]
+
+
+def test_get_board() -> None:
+    expected_boards: list[list[list[str]]] = [
+        [
+            ["r", ".", "b", "q", "k", "b", "n", "r"],
+            ["p", "p", "p", ".", "p", "p", "p", "p"],
+            [".", ".", "n", ".", ".", ".", ".", "."],
+            [".", ".", ".", "p", ".", ".", ".", "."],
+            [".", ".", ".", "P", ".", "B", ".", "."],
+            [".", ".", "N", ".", ".", ".", ".", "."],
+            ["P", "P", "P", ".", "P", "P", "P", "P"],
+            ["R", ".", ".", "Q", "K", "B", "N", "R"],
+        ],
+        [
+            ["r", ".", "b", "q", "k", "b", ".", "r"],
+            ["p", "p", "p", ".", "p", "p", "p", "p"],
+            [".", ".", "n", ".", ".", "n", ".", "."],
+            [".", "N", ".", "p", ".", ".", ".", "."],
+            [".", ".", ".", "P", ".", "B", ".", "."],
+            [".", ".", ".", ".", ".", ".", ".", "."],
+            ["P", "P", "P", ".", "P", "P", "P", "P"],
+            ["R", ".", ".", "Q", "K", "B", "N", "R"],
+        ],
+        [
+            ["r", ".", "b", "q", "k", "b", ".", "r"],
+            ["p", "p", "N", ".", ".", "p", "p", "p"],
+            [".", ".", "n", ".", "p", "n", ".", "."],
+            [".", ".", ".", "p", ".", ".", ".", "."],
+            [".", ".", ".", "P", ".", "B", ".", "."],
+            [".", ".", ".", ".", ".", ".", ".", "."],
+            ["P", "P", "P", ".", "P", "P", "P", "P"],
+            ["R", ".", ".", "Q", "K", "B", "N", "R"],
+        ],
+        [
+            [".", ".", ".", "r", ".", ".", "k", "."],
+            ["p", ".", ".", ".", ".", "p", "p", "p"],
+            ["b", ".", ".", ".", "p", ".", ".", "."],
+            ["Q", ".", ".", "p", ".", ".", ".", "."],
+            [".", ".", ".", "P", "n", ".", ".", "."],
+            [".", "P", ".", ".", "P", ".", ".", "."],
+            ["P", ".", "P", ".", ".", ".", "P", "P"],
+            ["R", ".", ".", ".", "R", ".", "K", "."],
+        ],
+    ]
+
+    for i, position in enumerate(find_mistakes(sample_game)):
+        actual = get_board(position)
+        assert actual.board == expected_boards[i]
