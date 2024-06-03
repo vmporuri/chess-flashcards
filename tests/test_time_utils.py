@@ -1,4 +1,4 @@
-from src.get_time import convert_utc_to_unix
+from src.time_utils import convert_utc_to_unix
 
 
 def test_convert_utc_to_unix() -> None:

@@ -5,7 +5,7 @@ from typing import Annotated, List
 import chess.pgn
 from pydantic import BaseModel, Field, conint, field_validator
 
-import src.get_time
+import src.time_utils as time_utils
 
 
 class Position(BaseModel):
@@ -31,7 +31,7 @@ def convert_pgn_to_game(pgn: str) -> chess.pgn.Game:
 
 def find_mistakes(pgn: str) -> List[Position]:
     game = convert_pgn_to_game(pgn)
-    timestamp = src.get_time.convert_utc_to_unix(
+    timestamp = time_utils.convert_utc_to_unix(
         game.headers["UTCDate"], game.headers["UTCTime"]
     )
     mistakes = []

@@ -1,4 +1,4 @@
-from src.process_games import find_mistakes
+from src.chess_utils import find_mistakes
 
 
 sample_game = """
