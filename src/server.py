@@ -1,4 +1,6 @@
-from flask import Flask, render_template, request
+from flask import Flask, render_template
+from pydantic import BaseModel, Field
+from flask_pydantic import validate
 
 app = Flask(
     __name__,
@@ -9,12 +11,20 @@ app = Flask(
 app.config["SEND_FILE_MAX_AGE_DEFAULT"] = 300
 
 
-@app.route("/")
+class MoveModel(BaseModel):
+    move: str = Field(pattern=r"^([a-h][1-8]){2}[qrbn]?$")
+
+
+class ValidationModel(BaseModel):
+    isValidMove: bool
+
+
+@app.get("/")
 def index():
     return render_template("index.html")
 
 
-@app.route("/puzzles")
+@app.get("/puzzles")
 def puzzles():
     return render_template("puzzle-page.html")
 
@@ -25,11 +35,9 @@ def get_fen():
 
 
 @app.post("/validate-move")
-def validate_move():
-    response = {}
-    body = request.get_json()
-    response["isValidMove"] = body["move"] == "d5e3"
-    return response
+@validate()
+def validate_move(body: MoveModel):
+    return ValidationModel(isValidMove=body.move == "d5e3")
 
 
 if __name__ == "__main__":

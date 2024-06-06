@@ -18,7 +18,7 @@ class BoardState(BaseModel):
     timestamp: Annotated[int, conint(ge=1356998400070)]
     board: list[list[str]]
     turn: str = Field(pattern=r"[b|w]")
-    solution: str = Field(pattern=r"^([a-h][1-8]){2}$")
+    solution: str = Field(pattern=r"^([a-h][1-8]){2}[qrbn]?$")
 
 
 def convert_pgn_to_game(pgn: str) -> chess.pgn.Game:
