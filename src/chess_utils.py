@@ -1,19 +1,11 @@
-from typing import Annotated, Generator, TextIO
+from typing import Generator, TextIO
 
 import chess.pgn
 import src.time_utils as time_utils
-from pydantic import BaseModel, Field, conint
+from src.models import Puzzle
 
 
-class Position(BaseModel):
-    timestamp: Annotated[int, conint(ge=1356998400070)]
-    fen: str = Field(
-        pattern=r"^((?:[1-8PNBRQKpnbrqk]+\/){7}[1-8PNBRQKpnbrqk]+) ([wb]) (K?Q?k?q?|-) ([a-h][1-8]|-) (\d+) (\d+)$"
-    )
-    solution: str = Field(pattern=r"^([a-h][1-8]){2}$")
-
-
-def find_mistakes_in_one_game(pgn: TextIO) -> Generator[Position, None, None]:
+def find_mistakes_in_one_game(pgn: TextIO) -> Generator[Puzzle, None, None]:
     game = chess.pgn.read_game(pgn)
     if game is None:
         return
@@ -25,7 +17,7 @@ def find_mistakes_in_one_game(pgn: TextIO) -> Generator[Position, None, None]:
     while curr_move is not None:
         if prev_move is not None and "was best" in curr_move.comment:
             fen = prev_move.board().fen()
-            yield Position(
+            yield Puzzle(
                 timestamp=timestamp,
                 fen=fen,
                 solution=str(prev_move.variations[1].move),
@@ -34,6 +26,6 @@ def find_mistakes_in_one_game(pgn: TextIO) -> Generator[Position, None, None]:
         curr_move = curr_move.next()
 
 
-def find_all_mistakes(pgn: TextIO) -> Generator[Position, None, None]:
+def find_all_mistakes(pgn: TextIO) -> Generator[Puzzle, None, None]:
     while not pgn.closed:
         yield from find_mistakes_in_one_game(pgn)

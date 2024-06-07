@@ -3,9 +3,10 @@ from datetime import timedelta
 from authlib.integrations.flask_client import OAuth
 from flask import Flask, redirect, render_template, session, url_for
 from flask_pydantic import validate
-from pydantic import BaseModel, Field
-
-from src.db import download_chess_games
+from src.download_utils import download_chess_games
+from src.models import MoveModel, ValidationModel
+from src.db import engine
+from sqlmodel import SQLModel
 
 LICHESS_HOST = "https://lichess.org"
 
@@ -34,14 +35,6 @@ app.config["LICHESS_CLIENT_ID"] = "chess-flashcards"
 
 oauth = OAuth(app)
 oauth.register("lichess", client_kwargs={"code_challenge_method": "S256"})
-
-
-class MoveModel(BaseModel):
-    move: str = Field(pattern=r"^([a-h][1-8]){2}[qrbn]?$")
-
-
-class ValidationModel(BaseModel):
-    isValidMove: bool
 
 
 @app.get("/")
@@ -94,4 +87,5 @@ def logout():
 
 
 if __name__ == "__main__":
+    SQLModel.metadata.create_all(engine)
     app.run()
