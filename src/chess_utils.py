@@ -35,5 +35,5 @@ def find_mistakes_in_one_game(pgn: TextIO) -> Generator[Position, None, None]:
 
 
 def find_all_mistakes(pgn: TextIO) -> Generator[Position, None, None]:
-    while pgn.readline():
+    while not pgn.closed:
         yield from find_mistakes_in_one_game(pgn)

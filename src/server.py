@@ -5,6 +5,8 @@ from flask import Flask, redirect, render_template, session, url_for
 from flask_pydantic import validate
 from pydantic import BaseModel, Field
 
+from src.db import download_chess_games
+
 LICHESS_HOST = "https://lichess.org"
 
 app = Flask(
@@ -73,12 +75,15 @@ def login():
 @app.get("/authorize")
 def authorize():
     assert oauth.lichess is not None
-    oauth.lichess.authorize_access_token()
+    token = oauth.lichess.authorize_access_token()
     resp = oauth.lichess.get(f"{LICHESS_HOST}/api/account")
     resp.raise_for_status()
     body = resp.json()
     session.permanent = True
     session["name"] = body["username"]
+    bearer = token["access_token"]
+    headers = {"Authorization": f"Bearer {bearer}"}
+    download_chess_games(body["username"], headers)
     return redirect("/")
 
 
