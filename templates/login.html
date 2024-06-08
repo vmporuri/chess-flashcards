@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Chess Flashcards</title>
+  </head>
+  <body>
+    <form action="/login" method="post">
+      <label for="username"><b>Username</b></label>
+      <input
+        type="text"
+        pattern="^\w{3,20}$"
+        minlength="3"
+        maxlength="20"
+        placeholder="Enter Username"
+        name="username"
+        required
+      />
+
+      <label for="password"><b>Password</b></label>
+      <input
+        type="password"
+        minlength="8"
+        minlength="20"
+        placeholder="Enter Password"
+        name="password"
+        required
+      />
+      <button type="submit">Log In</button>
+    </form>
+  </body>
+</html>
