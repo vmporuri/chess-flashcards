@@ -1,28 +1,43 @@
-import pydantic
-import sqlmodel
+from flask_sqlalchemy import SQLAlchemy
+
+db = SQLAlchemy()
 
 
 # SQLModel Schema
-class User(sqlmodel.SQLModel, table=True):
-    user_id: int | None = sqlmodel.Field(default=None, primary_key=True)
-    username: str
-    hashed_password: str
-    lichess_username: str | None
-    token: str | None
+class User(db.Model):
+    __tablename__ = "users"
+    user_id: int = db.Column(db.Integer, primary_key=True)
+    username: str = db.Column(db.String, unique=True, nullable=False)
+    hashed_password: str = db.Column(db.LargeBinary, nullable=False)
+
+    def __init__(self, username, hashed_password) -> None:
+        self.username = username
+        self.hashed_password = hashed_password
 
 
-class Puzzle(sqlmodel.SQLModel, table=True):
-    puzzle_id: int | None = sqlmodel.Field(default=None, primary_key=True)
-    user_id: int | None = sqlmodel.Field(default=None, foreign_key="user.user_id")
-    timestamp: int = sqlmodel.Field(ge=1356998400070)
-    fen: str = sqlmodel.Field(max_length=100)
-    solution: str = sqlmodel.Field(max_length=5)
+class LichessUser(db.Model):
+    __tablename__ = "lichess_users"
+    lichess_id: int = db.Column(db.Integer, primary_key=True)
+    user_id: int = db.Column(db.Integer, db.ForeignKey("users.user_id"))
+    lichess_username: str = db.Column(db.String, unique=True, nullable=False)
+    token: str = db.Column(db.String, unique=True, nullable=False)
+    expires: int = db.Column(db.Integer, nullable=False)
+
+    def __init__(self, lichess_username, token, expires) -> None:
+        self.lichess_username = lichess_username
+        self.token = token
+        self.expires = expires
 
 
-# Pydantic Schema
-class MoveModel(pydantic.BaseModel):
-    move: str = pydantic.Field(pattern=r"^([a-h][1-8]){2}[qrbn]?$")
+class Puzzle(db.Model):
+    __tablename__ = "puzzles"
+    puzzle_id: int | None = db.Column(db.Integer, primary_key=True)
+    user_id: int = db.Column(db.Integer, db.ForeignKey("users.user_id"))
+    timestamp: int = db.Column(db.Integer, nullable=False)
+    fen: str = db.Column(db.String, unique=True, nullable=False)
+    solution: str = db.Column(db.String, unique=True, nullable=False)
 
-
-class ValidationModel(pydantic.BaseModel):
-    isValidMove: bool
+    def __init__(self, timestamp, fen, solution) -> None:
+        self.timestamp = timestamp
+        self.fen = fen
+        self.solution = solution
