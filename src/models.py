@@ -1,10 +1,10 @@
 from flask_sqlalchemy import SQLAlchemy
+from flask_login import UserMixin
 
 db = SQLAlchemy()
 
 
-# SQLModel Schema
-class User(db.Model):
+class User(db.Model, UserMixin):
     __tablename__ = "users"
     user_id: int = db.Column(db.Integer, primary_key=True)
     username: str = db.Column(db.String, unique=True, nullable=False)
@@ -13,6 +13,9 @@ class User(db.Model):
     def __init__(self, username, hashed_password) -> None:
         self.username = username
         self.hashed_password = hashed_password
+
+    def get_id(self) -> str:
+        return str(self.user_id)
 
 
 class LichessUser(db.Model):

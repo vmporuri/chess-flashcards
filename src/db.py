@@ -1,16 +1,16 @@
-from typing import Generator
+from typing import Generator, Optional
 
-from src.models import db, Puzzle, User
 from flask_bcrypt import Bcrypt
-
-USER_EXISTS = -1
+from flask_login import LoginManager
+from src.models import Puzzle, User, db
 
 bcrypt = Bcrypt()
+login_manager = LoginManager()
 
 
 def add_games_to_db(
     puzzles: Generator[Puzzle, None, None],
-    user_id: int,
+    user_id: str,
     batch_size: int = 50,
 ) -> None:
     batch = 0
@@ -24,13 +24,23 @@ def add_games_to_db(
     db.session.commit()
 
 
-def register_new_user(user_data: dict[str, str]) -> int:
-    username = user_data["username"]
+def register_new_user(username: str, password: str) -> Optional[User]:
     if User.query.filter_by(username=username).first() is not None:
-        return USER_EXISTS
-    hashed_password = bcrypt.generate_password_hash(user_data["password"])
+        return None
+    hashed_password = bcrypt.generate_password_hash(password)
     new_user = User(username=username, hashed_password=hashed_password)
     db.session.add(new_user)
     db.session.commit()
-    print(new_user.user_id)
-    return new_user.user_id
+    return new_user
+
+
+def verify_login_credentials(username: str, password: str) -> Optional[User]:
+    user = User.query.filter_by(username=username).first()
+    if user is None or not bcrypt.check_password_hash(user.hashed_password, password):
+        return None
+    return user
+
+
+@login_manager.user_loader
+def load_user(user_id) -> Optional[User]:
+    return User.query.get(user_id)
