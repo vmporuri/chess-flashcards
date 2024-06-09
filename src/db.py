@@ -1,16 +1,12 @@
 from typing import Generator, Optional
 
-from flask_bcrypt import Bcrypt
-from flask_login import LoginManager
-from src.models import Puzzle, User, db
-
-bcrypt = Bcrypt()
-login_manager = LoginManager()
+from src.app import bcrypt, db, login_manager
+from src.models import Puzzle, User
 
 
 def add_games_to_db(
     puzzles: Generator[Puzzle, None, None],
-    user_id: str,
+    user_id: int,
     batch_size: int = 50,
 ) -> None:
     batch = 0
