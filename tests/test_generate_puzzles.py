@@ -1,6 +1,9 @@
 import io
 
-from src.chess_utils import find_all_mistakes, find_mistakes_in_one_game
+from src.puzzle_generator.generate_puzzles import (
+    find_all_mistakes,
+    find_mistakes_in_one_game,
+)
 
 sample_one_game = """
 [UTCDate "2024.06.02"]

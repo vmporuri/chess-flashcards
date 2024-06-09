@@ -1,7 +1,16 @@
+from authlib.integrations.flask_client import OAuth
 from flask import Flask, redirect, render_template, request, url_for
-from flask_login import current_user, login_required, login_user, logout_user
-from src.db import register_new_user, verify_login_credentials
-from src.app import oauth
+from flask_login import (
+    LoginManager,
+    current_user,
+    login_required,
+    login_user,
+    logout_user,
+)
+from src.auth import register_new_user, verify_login_credentials
+
+oauth = OAuth()
+login_manager = LoginManager()
 
 
 def register_routes(app: Flask) -> None:
@@ -29,18 +38,22 @@ def register_routes(app: Flask) -> None:
 
     @app.get("/authorize")
     def authorize():
-        redirect_uri = url_for("authorize", _external=True)
+        redirect_uri = url_for("token", _external=True)
         return oauth.lichess.authorize_redirect(redirect_uri)
 
     @app.get("/token")
     def token():
         token = oauth.lichess.authorize_access_token()
-        print(token)
         resp = oauth.lichess.get("https://lichess.org/api/account")
         resp.raise_for_status()
         body = resp.json()
-        # bearer = token["access_token"]
-        # headers = {"Authorization": f"Bearer {bearer}"}
+
+        lichess_user = {}
+        lichess_user["lichess_username"] = body["username"]
+        lichess_user["token"] = token["access_token"]
+        lichess_user["expires"] = token["expires_at"]
+        lichess_user["user_id"] = current_user.user_id
+        print(lichess_user)
         return redirect("/sync-games")
 
     @app.get("/sync-games")

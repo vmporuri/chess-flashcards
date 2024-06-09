@@ -1,4 +1,4 @@
-from src.time_utils import convert_utc_to_unix
+from src.puzzle_generator.time_utils import convert_utc_to_unix
 
 
 def test_convert_utc_to_unix() -> None:

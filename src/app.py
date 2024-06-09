@@ -1,15 +1,12 @@
-from authlib.integrations.flask_client import OAuth
-from flask import Flask
-from flask_bcrypt import Bcrypt
-from flask_login import LoginManager
-from flask_session import Session
-from flask_sqlalchemy import SQLAlchemy
+from typing import Optional
 
-oauth = OAuth()
-bcrypt = Bcrypt()
-login_manager = LoginManager()
+from flask import Flask
+from flask_session import Session
+from src.auth import bcrypt
+from src.models import User, db
+from src.routes import login_manager, oauth, register_routes
+
 sess = Session()
-db = SQLAlchemy()
 
 
 def create_app() -> Flask:
@@ -40,13 +37,17 @@ def create_app() -> Flask:
     # app.config["LICHESS_CLIENT_ID"] = os.getenv("LICHESS_CLIENT_ID")
 
     db.init_app(app)
-    oauth.init_app(app)
     bcrypt.init_app(app)
     login_manager.init_app(app)
     sess.init_app(app)
+    oauth.init_app(app)
 
+    register_routes(app)
+    oauth.register("lichess", client_kwargs={"code_challenge_method": "S256"})
     login_manager.login_view = "login_get"
 
-    oauth.register("lichess", client_kwargs={"code_challenge_method": "S256"})
+    @login_manager.user_loader
+    def load_user(user_id) -> Optional[User]:
+        return User.query.get(user_id)
 
     return app

@@ -1,7 +1,7 @@
 from typing import Generator, TextIO
 
 import chess.pgn
-import src.time_utils as time_utils
+import src.puzzle_generator.time_utils as time_utils
 from src.models import Puzzle
 
 
