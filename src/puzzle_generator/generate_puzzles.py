@@ -5,8 +5,12 @@ import src.puzzle_generator.time_utils as time_utils
 from src.models import Puzzle
 
 
-def generate_puzzles_from_game(pgn: TextIO) -> Generator[Puzzle, None, None]:
-    game = chess.pgn.read_game(pgn)
+def generate_puzzles_from_game(pgn_stream: TextIO) -> Generator[Puzzle, None, None]:
+    """A generator function that yields puzzles from one game.
+
+    Note: Only pushes PGN_STREAM forward by one game.
+    """
+    game = chess.pgn.read_game(pgn_stream)
     if game is None:
         return
     timestamp = time_utils.convert_utc_to_unix(
@@ -26,6 +30,10 @@ def generate_puzzles_from_game(pgn: TextIO) -> Generator[Puzzle, None, None]:
         curr_move = curr_move.next()
 
 
-def generate_puzzles(pgn: TextIO) -> Generator[Puzzle, None, None]:
-    while not pgn.closed:
-        yield from generate_puzzles_from_game(pgn)
+def generate_puzzles(pgn_stream: TextIO) -> Generator[Puzzle, None, None]:
+    """Provided a stream of pgns, yields puzzles from each game.
+
+    Note: PGN_STREAM must close automatically after all lines are read.
+    """
+    while not pgn_stream.closed:
+        yield from generate_puzzles_from_game(pgn_stream)

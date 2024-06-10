@@ -1,4 +1,4 @@
-import io
+from io import StringIO
 
 from src.puzzle_generator.generate_puzzles import generate_puzzles
 
@@ -22,8 +22,17 @@ sample_multiple_games = """
 """
 
 
+class AutoCloseStringIO(StringIO):
+    @property
+    def closed(self):
+        old_pos = self.tell()
+        is_closed = not bool(self.readline())
+        self.seek(old_pos)
+        return is_closed
+
+
 def test_generate_puzzles_one_game() -> None:
-    with io.StringIO(sample_one_game) as pgn:
+    with AutoCloseStringIO(sample_one_game) as pgn:
         actual = list(generate_puzzles(pgn))
     expected_timestamps = [1717359176000] * len(actual)
     expected_fens = [
@@ -52,7 +61,7 @@ def test_generate_puzzles_one_game() -> None:
 
 
 def test_generate_puzzles() -> None:
-    with io.StringIO(sample_multiple_games) as pgn:
+    with AutoCloseStringIO(sample_multiple_games) as pgn:
         actual = list(generate_puzzles(pgn))
 
     expected_timestamps = [
