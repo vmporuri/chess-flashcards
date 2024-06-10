@@ -1,5 +1,5 @@
 from authlib.integrations.flask_client import OAuth
-from flask import Flask, redirect, render_template, request, url_for
+from flask import Flask, redirect, render_template, request, session, url_for
 from flask_login import (
     LoginManager,
     current_user,
@@ -7,7 +7,8 @@ from flask_login import (
     login_user,
     logout_user,
 )
-from puzzle_generator.db import add_puzzles_to_db
+from db import fetch_random_puzzle_fen
+from puzzle_generator.puzzle_db import add_puzzles_to_db
 from src.auth import add_oauth_token, register_new_user, verify_login_credentials
 from src.models import db
 
@@ -32,13 +33,20 @@ def register_routes(app: Flask) -> None:
     @app.get("/get-fen")
     @login_required
     def get_fen():
-        return {"fen": "r1k4r/p2nb1p1/2b4p/1p1n1p2/2PP4/3Q1NB1/1P3PPP/R5K1 b - - 0 19"}
+        if "fen" not in session:
+            fen, solution = fetch_random_puzzle_fen(current_user.user_id)
+            session["fen"] = fen
+            session["solution"] = solution
+        return {"fen": session["fen"]}
 
     @app.post("/validate-move")
     @login_required
     def validate_move():
         body = request.json
-        return {"isValidMove": body["move"] == "d5e3"}
+        if is_correct := body["move"] == session["solution"]:
+            session.pop("fen", None)
+            session.pop("solution", None)
+        return {"isValidMove": is_correct}
 
     @app.get("/authorize")
     @login_required
