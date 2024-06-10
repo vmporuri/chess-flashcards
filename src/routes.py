@@ -75,7 +75,7 @@ def register_routes(app: Flask) -> None:
     @app.get("/sync-games")
     def sync_games():
         if current_user.lichess_user is not None:
-            add_puzzles_to_db(app, db, current_user.lichess_user)
+            add_puzzles_to_db(db, current_user.lichess_user)
         return redirect("/profile")
 
     @app.get("/login")

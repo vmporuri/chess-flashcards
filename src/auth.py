@@ -7,7 +7,9 @@ bcrypt = Bcrypt()
 
 
 def register_new_user(username: str, password: str) -> Optional[User]:
-    if User.query.filter_by(username=username).first() is not None:
+    stmt = db.select(User).filter_by(username=username)
+    old_user = db.session.scalars(stmt).first()
+    if old_user is not None:
         return None
     hashed_password = bcrypt.generate_password_hash(password)
     new_user = User(username=username, hashed_password=hashed_password)
@@ -17,7 +19,8 @@ def register_new_user(username: str, password: str) -> Optional[User]:
 
 
 def verify_login_credentials(username: str, password: str) -> Optional[User]:
-    user = User.query.filter_by(username=username).first()
+    stmt = db.select(User).filter_by(username=username)
+    user = db.session.scalars(stmt).first()
     if user is None or not bcrypt.check_password_hash(user.hashed_password, password):
         return None
     return user
