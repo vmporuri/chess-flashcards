@@ -7,7 +7,7 @@ from flask_login import (
     login_user,
     logout_user,
 )
-from src.auth import register_new_user, verify_login_credentials
+from src.auth import register_new_user, verify_login_credentials, add_oauth_token
 
 oauth = OAuth()
 login_manager = LoginManager()
@@ -17,12 +17,14 @@ def register_routes(app: Flask) -> None:
     @app.get("/")
     def index():
         if current_user.is_authenticated:
-            return redirect("/profile")
+            return redirect(url_for("profile"))
         return render_template("index.html")
 
     @app.get("/puzzles")
     @login_required
     def puzzles():
+        if current_user.lichess_user is None:
+            return redirect(url_for("profile"))
         return render_template("puzzle-page.html")
 
     @app.get("/get-fen")
@@ -37,23 +39,27 @@ def register_routes(app: Flask) -> None:
         return {"isValidMove": body["move"] == "d5e3"}
 
     @app.get("/authorize")
+    @login_required
     def authorize():
+        if current_user.lichess_user is not None:
+            return redirect(url_for("profile"))
         redirect_uri = url_for("token", _external=True)
         return oauth.lichess.authorize_redirect(redirect_uri)
 
     @app.get("/token")
+    @login_required
     def token():
         token = oauth.lichess.authorize_access_token()
         resp = oauth.lichess.get("https://lichess.org/api/account")
         resp.raise_for_status()
         body = resp.json()
 
-        lichess_user = {}
-        lichess_user["lichess_username"] = body["username"]
-        lichess_user["token"] = token["access_token"]
-        lichess_user["expires"] = token["expires_at"]
-        lichess_user["user_id"] = current_user.user_id
-        print(lichess_user)
+        add_oauth_token(
+            user_id=current_user.user_id,
+            lichess_username=body["username"],
+            token=token["access_token"],
+            expires=token["expires_at"],
+        )
         return redirect("/sync-games")
 
     @app.get("/sync-games")

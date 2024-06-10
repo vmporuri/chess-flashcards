@@ -1,7 +1,7 @@
 from typing import Optional
 
 from flask_bcrypt import Bcrypt
-from src.models import User, db
+from src.models import LichessUser, User, db
 
 bcrypt = Bcrypt()
 
@@ -21,3 +21,11 @@ def verify_login_credentials(username: str, password: str) -> Optional[User]:
     if user is None or not bcrypt.check_password_hash(user.hashed_password, password):
         return None
     return user
+
+
+def add_oauth_token(user_id, lichess_username, token, expires) -> None:
+    new_lichess_user = LichessUser(
+        user_id=user_id, lichess_username=lichess_username, token=token, expires=expires
+    )
+    db.session.add(new_lichess_user)
+    db.session.commit()
