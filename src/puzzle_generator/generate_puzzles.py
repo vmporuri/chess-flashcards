@@ -5,7 +5,7 @@ import src.puzzle_generator.time_utils as time_utils
 from src.models import Puzzle
 
 
-def find_mistakes_in_one_game(pgn: TextIO) -> Generator[Puzzle, None, None]:
+def generate_puzzles_from_game(pgn: TextIO) -> Generator[Puzzle, None, None]:
     game = chess.pgn.read_game(pgn)
     if game is None:
         return
@@ -26,6 +26,6 @@ def find_mistakes_in_one_game(pgn: TextIO) -> Generator[Puzzle, None, None]:
         curr_move = curr_move.next()
 
 
-def find_all_mistakes(pgn: TextIO) -> Generator[Puzzle, None, None]:
+def generate_puzzles(pgn: TextIO) -> Generator[Puzzle, None, None]:
     while not pgn.closed:
-        yield from find_mistakes_in_one_game(pgn)
+        yield from generate_puzzles_from_game(pgn)

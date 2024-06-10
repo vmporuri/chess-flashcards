@@ -7,7 +7,9 @@ from flask_login import (
     login_user,
     logout_user,
 )
-from src.auth import register_new_user, verify_login_credentials, add_oauth_token
+from puzzle_generator.db import add_puzzles_to_db
+from src.auth import add_oauth_token, register_new_user, verify_login_credentials
+from src.models import db
 
 oauth = OAuth()
 login_manager = LoginManager()
@@ -64,7 +66,8 @@ def register_routes(app: Flask) -> None:
 
     @app.get("/sync-games")
     def sync_games():
-        # download_chess_games(body["username"], headers)
+        if current_user.lichess_user is not None:
+            add_puzzles_to_db(app, db, current_user.lichess_user)
         return redirect("/profile")
 
     @app.get("/login")

@@ -1,9 +1,6 @@
 import io
 
-from src.puzzle_generator.generate_puzzles import (
-    find_all_mistakes,
-    find_mistakes_in_one_game,
-)
+from src.puzzle_generator.generate_puzzles import generate_puzzles
 
 sample_one_game = """
 [UTCDate "2024.06.02"]
@@ -25,9 +22,9 @@ sample_multiple_games = """
 """
 
 
-def test_find_mistakes_in_one_game() -> None:
+def test_generate_puzzles_one_game() -> None:
     with io.StringIO(sample_one_game) as pgn:
-        actual = list(find_mistakes_in_one_game(pgn))
+        actual = list(generate_puzzles(pgn))
     expected_timestamps = [1717359176000] * len(actual)
     expected_fens = [
         "r1bqkbnr/ppp1pppp/2n5/3p4/3P1B2/2N5/PPP1PPPP/R2QKBNR b KQkq - 3 3",
@@ -54,9 +51,9 @@ def test_find_mistakes_in_one_game() -> None:
     assert len(expected_solutions) == 0
 
 
-def test_find_all_mistakes() -> None:
+def test_generate_puzzles() -> None:
     with io.StringIO(sample_multiple_games) as pgn:
-        actual = list(find_all_mistakes(pgn))
+        actual = list(generate_puzzles(pgn))
 
     expected_timestamps = [
         1717648767000,

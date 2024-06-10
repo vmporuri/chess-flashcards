@@ -1,19 +1,22 @@
-from typing import Generator
+from flask import Flask
+from flask_sqlalchemy import SQLAlchemy
+from puzzle_generator.generate_puzzles import generate_puzzles
+from puzzle_generator.lichess_api import stream_games
+from src.models import LichessUser, Puzzle
+from io import TextIOWrapper
 
-from src.models import Puzzle, db
+
+def add_puzzles_to_db(app: Flask, db: SQLAlchemy, lichess_user: LichessUser) -> None:
+    token = lichess_user.token
+    headers = {"Authorization": f"Bearer {token}"}
+    with stream_games(lichess_user.lichess_username, headers) as http_stream:
+        with TextIOWrapper(http_stream) as pgn_stream:
+            for puzzle in generate_puzzles(pgn_stream):
+                add_puzzle(app, db, puzzle, lichess_user.user_id)
 
 
-def add_games_to_db(
-    puzzles: Generator[Puzzle, None, None],
-    user_id: int,
-    batch_size: int = 50,
-) -> None:
-    batch = 0
-    for puzzle in puzzles:
+def add_puzzle(app: Flask, db: SQLAlchemy, puzzle: Puzzle, user_id: int) -> None:
+    with app.app_context():
         puzzle.user_id = user_id
         db.session.add(puzzle)
-        if batch >= batch_size:
-            batch = 0
-            db.session.commit()
-
-    db.session.commit()
+        db.session.commit()
