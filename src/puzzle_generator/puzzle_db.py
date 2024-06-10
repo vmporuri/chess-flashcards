@@ -20,7 +20,7 @@ def add_puzzles_to_db(db: SQLAlchemy, lichess_user: LichessUser) -> None:
     headers = {"Authorization": f"Bearer {token}"}
     with stream_games(lichess_user.lichess_username, timestamp, headers) as http_stream:
         with TextIOWrapper(http_stream) as pgn_stream:
-            for puzzle in generate_puzzles(pgn_stream):
+            for puzzle in generate_puzzles(pgn_stream, lichess_user.lichess_username):
                 add_puzzle(db, puzzle, lichess_user.user_id)
 
 

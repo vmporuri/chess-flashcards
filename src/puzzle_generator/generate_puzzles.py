@@ -5,7 +5,9 @@ import src.puzzle_generator.time_utils as time_utils
 from src.models import Puzzle
 
 
-def generate_puzzles_from_game(pgn_stream: TextIO) -> Generator[Puzzle, None, None]:
+def generate_puzzles_from_game(
+    pgn_stream: TextIO, lichess_username: str
+) -> Generator[Puzzle, None, None]:
     """A generator function that yields puzzles from one game.
 
     Note: Only pushes PGN_STREAM forward by one game.
@@ -16,10 +18,15 @@ def generate_puzzles_from_game(pgn_stream: TextIO) -> Generator[Puzzle, None, No
     timestamp = time_utils.convert_utc_to_unix(
         game.headers["UTCDate"], game.headers["UTCTime"]
     )
+    color = game.headers["White"] == lichess_username
     curr_move = game.next()
     prev_move = None
     while curr_move is not None:
-        if prev_move is not None and "was best" in curr_move.comment:
+        if (
+            prev_move is not None
+            and prev_move.turn() == color
+            and "was best" in curr_move.comment
+        ):
             fen = prev_move.board().fen()
             yield Puzzle(
                 timestamp=timestamp,
@@ -30,10 +37,12 @@ def generate_puzzles_from_game(pgn_stream: TextIO) -> Generator[Puzzle, None, No
         curr_move = curr_move.next()
 
 
-def generate_puzzles(pgn_stream: TextIO) -> Generator[Puzzle, None, None]:
+def generate_puzzles(
+    pgn_stream: TextIO, lichess_username: str
+) -> Generator[Puzzle, None, None]:
     """Provided a stream of pgns, yields puzzles from each game.
 
     Note: PGN_STREAM must close automatically after all lines are read.
     """
     while not pgn_stream.closed:
-        yield from generate_puzzles_from_game(pgn_stream)
+        yield from generate_puzzles_from_game(pgn_stream, lichess_username)
