@@ -12,6 +12,8 @@ db = SQLAlchemy(model_class=Base)
 
 
 class User(db.Model, UserMixin):
+    """A user of Chess Flashcards."""
+
     __tablename__ = "users"
 
     user_id: Mapped[int] = mapped_column(primary_key=True)
@@ -26,6 +28,8 @@ class User(db.Model, UserMixin):
 
 
 class LichessUser(db.Model):
+    """A Lichess user. Account is tied to a user in USERS."""
+
     __tablename__ = "lichess_users"
 
     lichess_id: Mapped[int] = mapped_column(primary_key=True)
@@ -38,6 +42,8 @@ class LichessUser(db.Model):
 
 
 class Puzzle(db.Model):
+    """A puzzle generated from a user's Lichess games."""
+
     __tablename__ = "puzzles"
 
     puzzle_id: Mapped[int] = mapped_column(primary_key=True)

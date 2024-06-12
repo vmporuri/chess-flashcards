@@ -17,6 +17,7 @@ login_manager = LoginManager()
 def register_routes(app: Flask) -> None:
     @app.get("/")
     def index():
+        """Renders the home page."""
         if current_user.is_authenticated:
             return redirect(url_for("profile"))
         return render_template("index.html")
@@ -24,6 +25,7 @@ def register_routes(app: Flask) -> None:
     @app.get("/puzzles")
     @login_required
     def puzzles():
+        """Renders the puzzle page."""
         if current_user.lichess_user is None:
             return redirect(url_for("profile"))
         return render_template("puzzle-page.html")
@@ -31,6 +33,7 @@ def register_routes(app: Flask) -> None:
     @app.get("/get-fen")
     @login_required
     def get_fen():
+        """Retrieves a random puzzle fen from the database."""
         if "fen" not in session or not session["fen"]:
             fen, solution = fetch_random_puzzle_fen(current_user.user_id)
             session["fen"] = fen
@@ -40,6 +43,7 @@ def register_routes(app: Flask) -> None:
     @app.post("/validate-move")
     @login_required
     def validate_move():
+        """Validates the chess move provided in the request body."""
         body = request.json
         if is_correct := body["move"] == session["solution"]:
             session.pop("fen", None)
@@ -49,6 +53,7 @@ def register_routes(app: Flask) -> None:
     @app.get("/authorize")
     @login_required
     def authorize():
+        """Retrieves Lichess authorization code (via OAuth 2.0 PKCE flow)."""
         if current_user.lichess_user is not None:
             return redirect(url_for("profile"))
         redirect_uri = url_for("token", _external=True)
@@ -57,6 +62,7 @@ def register_routes(app: Flask) -> None:
     @app.get("/token")
     @login_required
     def token():
+        """Retrieves Lichess access token and adds to database."""
         token = oauth.lichess.authorize_access_token()
         resp = oauth.lichess.get("https://lichess.org/api/account")
         resp.raise_for_status()
@@ -74,12 +80,14 @@ def register_routes(app: Flask) -> None:
 
     @app.get("/login")
     def login_get():
+        """Renders the login page."""
         if current_user.is_authenticated:
             return redirect(url_for("profile"))
         return render_template("login.html")
 
     @app.post("/login")
     def login_post():
+        """Verifies the provided login credentials."""
         user = verify_login_credentials(**request.form)
         if user is None:
             flash("Incorrect Username or Password", "warning")
@@ -89,12 +97,14 @@ def register_routes(app: Flask) -> None:
 
     @app.get("/register")
     def register_get():
+        """Renders the registration page."""
         if current_user.is_authenticated:
             return redirect(url_for("profile"))
         return render_template("register.html")
 
     @app.post("/register")
     def register_post():
+        """Registers the user with the provided credentials."""
         user = register_new_user(**request.form)
         if user is None:
             flash("Username Already in Use", "warning")
@@ -105,6 +115,7 @@ def register_routes(app: Flask) -> None:
     @app.get("/logout")
     @login_required
     def logout():
+        """Logs out the user, ending their session."""
         logout_user()
         flash("Logged out Successfully", "info")
         return redirect(url_for("index"))
@@ -112,4 +123,5 @@ def register_routes(app: Flask) -> None:
     @app.get("/profile")
     @login_required
     def profile():
+        """Renders the profile page."""
         return render_template("profile.html")
