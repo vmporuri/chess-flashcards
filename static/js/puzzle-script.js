@@ -4,6 +4,7 @@ let solved = false;
 
 const turnStatus = document.querySelector("#turn");
 const newPuzzleButton = document.querySelector("#new-puzzle");
+const alertIncorrectMove = document.querySelector("#alert-border-2");
 const config = {
   draggable: true,
   onDragStart: onDragStart,
@@ -22,6 +23,7 @@ async function setupNewPuzzle() {
     solved = false;
     newPuzzleButton.style.display = "none";
     const moveColor = game.turn() === "b" ? "Black" : "White";
+    alertIncorrectMove.style.display = "none";
     turnStatus.innerText = `${moveColor} to move`;
   } catch (error) {
     console.error("Error setting up game:", error);
@@ -65,6 +67,7 @@ async function onDrop(source, target) {
     } else {
       game.undo();
       board.position(game.fen());
+      alertIncorrectMove.style.display = "";
     }
   } catch (error) {
     console.error("Error validating move:", error);

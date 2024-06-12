@@ -1,47 +1,23 @@
-<!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Chess Flashcards</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-  </head>
-  <header>
-    <nav
-      class="bg-white dark:bg-gray-900 fixed w-full z-20 top-0 start-0 border-b border-gray-200 dark:border-gray-600"
+{% extends "base.html" %}
+
+{% block navbar %}
+  {{ super() }}
+{% endblock navbar %}
+
+{% block content %}
+  <section class="bg-gray-50 dark:bg-gray-900">
+    <div
+      class="flex flex-col items-center justify-center gap-4 px-6 py-8 mx-auto h-screen lg:py-0"
     >
-      <div
-        class="max-w-screen-xl flex flex-wrap items-center justify-between mx-auto p-4"
-      >
-        <a href="/" class="flex items-center space-x-3 rtl:space-x-reverse">
-          <span
-            class="self-center text-2xl font-semibold whitespace-nowrap dark:text-white"
-            >Chess Flashcards</span
-          >
-        </a>
-        <div
-          class="flex gap-2 md:order-2 space-x-3 md:space-x-0 rtl:space-x-reverse"
-        >
-          <a href="/logout">
-            <button
-              type="button"
-              class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-4 py-2 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
-            >
-              Log Out
-            </button>
-          </a>
-        </div>
-      </div>
-    </nav>
-  </header>
-  <body>
-    <section class="bg-gray-50 dark:bg-gray-900">
-      <div
-        class="flex flex-col items-center justify-center gap-4 px-6 py-8 mx-auto h-screen lg:py-0"
-      >
-        <h2 class="text-3xl font-semibold dark:text-white my-6">
-          Hello, User!
+      {% include "alert.html" %}
+      <h2 class="text-3xl font-semibold dark:text-white my-6">
+        Hello, {{ current_user.username }}!
+      </h2>
+      {% if current_user.lichess_user %}
+        <h2 class="text-xl dark:text-white my-6">
+          Lichess Account: {{ current_user.lichess_user.lichess_username }}
         </h2>
+      {% else %}
         <a href="/authorize">
           <button
             type="button"
@@ -50,15 +26,15 @@
             Link Lichess Account
           </button>
         </a>
-        <a href="/puzzles">
-          <button
-            type="button"
-            class="text-white text-xl bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-4 py-2 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
-          >
-            Puzzles
-          </button>
-        </a>
-      </div>
-    </section>
-  </body>
-</html>
+      {% endif %}
+      <a href="/puzzles">
+        <button
+          type="button"
+          class="text-white text-xl bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-4 py-2 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+        >
+          Puzzles
+        </button>
+      </a>
+    </div>
+  </section>
+{% endblock content %}

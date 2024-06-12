@@ -1,5 +1,5 @@
 from authlib.integrations.flask_client import OAuth
-from flask import Flask, redirect, render_template, request, session, url_for
+from flask import Flask, flash, redirect, render_template, request, session, url_for
 from flask_login import (
     LoginManager,
     current_user,
@@ -31,11 +31,10 @@ def register_routes(app: Flask) -> None:
     @app.get("/get-fen")
     @login_required
     def get_fen():
-        if "fen" not in session:
+        if "fen" not in session or not session["fen"]:
             fen, solution = fetch_random_puzzle_fen(current_user.user_id)
-            if fen:
-                session["fen"] = fen
-                session["solution"] = solution
+            session["fen"] = fen
+            session["solution"] = solution
         return {"fen": session["fen"]}
 
     @app.post("/validate-move")
@@ -70,6 +69,7 @@ def register_routes(app: Flask) -> None:
             expires=token["expires_at"],
         )
         executor.submit(add_puzzles_to_db, current_user.lichess_user)
+        flash("Linked account successfully!", "info")
         return redirect(url_for("profile"))
 
     @app.get("/login")
@@ -82,6 +82,7 @@ def register_routes(app: Flask) -> None:
     def login_post():
         user = verify_login_credentials(**request.form)
         if user is None:
+            flash("Incorrect Username or Password", "warning")
             return redirect(url_for("login_get"))
         login_user(user)
         return redirect(url_for("profile"))
@@ -96,6 +97,7 @@ def register_routes(app: Flask) -> None:
     def register_post():
         user = register_new_user(**request.form)
         if user is None:
+            flash("Username Already in Use", "warning")
             return redirect(url_for("register_get"))
         login_user(user)
         return redirect(url_for("profile"))
@@ -104,6 +106,7 @@ def register_routes(app: Flask) -> None:
     @login_required
     def logout():
         logout_user()
+        flash("Logged out Successfully", "info")
         return redirect(url_for("index"))
 
     @app.get("/profile")
