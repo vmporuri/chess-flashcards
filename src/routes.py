@@ -7,10 +7,8 @@ from flask_login import (
     login_user,
     logout_user,
 )
-from db import fetch_random_puzzle_fen
-from puzzle_generator.puzzle_db import add_puzzles_to_db
 from src.auth import add_oauth_token, register_new_user, verify_login_credentials
-from src.models import db
+from src.db import add_puzzles_to_db, fetch_random_puzzle_fen, executor
 
 oauth = OAuth()
 login_manager = LoginManager()
@@ -35,8 +33,9 @@ def register_routes(app: Flask) -> None:
     def get_fen():
         if "fen" not in session:
             fen, solution = fetch_random_puzzle_fen(current_user.user_id)
-            session["fen"] = fen
-            session["solution"] = solution
+            if fen:
+                session["fen"] = fen
+                session["solution"] = solution
         return {"fen": session["fen"]}
 
     @app.post("/validate-move")
@@ -70,47 +69,42 @@ def register_routes(app: Flask) -> None:
             token=token["access_token"],
             expires=token["expires_at"],
         )
-        return redirect("/sync-games")
-
-    @app.get("/sync-games")
-    def sync_games():
-        if current_user.lichess_user is not None:
-            add_puzzles_to_db(db, current_user.lichess_user)
-        return redirect("/profile")
+        executor.submit(add_puzzles_to_db, current_user.lichess_user)
+        return redirect(url_for("profile"))
 
     @app.get("/login")
     def login_get():
         if current_user.is_authenticated:
-            return redirect("/profile")
+            return redirect(url_for("profile"))
         return render_template("login.html")
 
     @app.post("/login")
     def login_post():
         user = verify_login_credentials(**request.form)
         if user is None:
-            return redirect("/profile")
+            return redirect(url_for("login_get"))
         login_user(user)
-        return redirect("/profile")
+        return redirect(url_for("profile"))
 
     @app.get("/register")
     def register_get():
         if current_user.is_authenticated:
-            return redirect("/profile")
+            return redirect(url_for("profile"))
         return render_template("register.html")
 
     @app.post("/register")
     def register_post():
         user = register_new_user(**request.form)
         if user is None:
-            return redirect("/register")
+            return redirect(url_for("register_get"))
         login_user(user)
-        return redirect("/profile")
+        return redirect(url_for("profile"))
 
     @app.get("/logout")
     @login_required
     def logout():
         logout_user()
-        return redirect("/")
+        return redirect(url_for("index"))
 
     @app.get("/profile")
     @login_required
