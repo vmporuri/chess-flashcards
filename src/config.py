@@ -1,4 +1,9 @@
+import os
+
+from dotenv import load_dotenv
 from src.models import db
+
+load_dotenv(".env")
 
 
 class Config:
@@ -11,13 +16,5 @@ class Config:
 
     LICHESS_AUTHORIZE_URL = "https://lichess.org/oauth"
     LICHESS_ACCESS_TOKEN_URL = "https://lichess.org/api/token"
-    # NOTE: Set a secure SECRET_KEY and LICHESS_CLIENT_ID in a .env file when not
-    # running in a development environment. Then, replace the following lines with
-    # the commented out lines.
-    SECRET_KEY = "dummy-key"
-    LICHESS_CLIENT_ID = "chess-flashcards"
-    # import os
-    # from dotenv import load_dotenv
-    # load_dotenv("../.env")
-    # SECRET_KEY = os.getenv("SECRET_KEY")
-    # LICHESS_CLIENT_ID = os.getenv("LICHESS_CLIENT_ID")
+    LICHESS_CLIENT_ID = os.getenv("LICHESS_CLIENT_ID")
+    SECRET_KEY = os.getenv("SECRET_KEY")
