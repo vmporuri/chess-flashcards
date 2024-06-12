@@ -1,0 +1,25 @@
+[project]
+name = "chess-flashcards"
+version = "0.1.0"
+requires-python = ">=3.12"
+authors = [
+  {name = "Venu Poruri"},
+]
+maintainers = [
+  {name = "Venu Poruri"},
+]
+description = "Automatically generates chess flashcards from mistakes in your Lichess games."
+readme = "README.md"
+license = {file = "LICENSE"}
+keywords = ["chess", "puzzles", "web app", "flask"]
+dynamic = ["dependencies"]
+
+[project.urls]
+Repository = "https://github.com/vmporuri/chess-flashcards.git"
+
+[tool.setuptools.dynamic]
+dependencies = {file = ["requirements.txt"]}
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
