@@ -10,6 +10,9 @@ flask create-db
 python -c 'import uuid; print(f"LICHESS_CLIENT_ID=\"{uuid.uuid4()}\"")' >> .env
 python -c 'import secrets; print(f"SECRET_KEY=\"{secrets.token_hex()}\"")' >> .env
 
+# Start command
+gunicorn -w 4 'src.run:app'
+
 # Cron tasks
 flask session_cleanup
 flask refresh-puzzles
