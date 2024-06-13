@@ -6,7 +6,7 @@ from src.auth import bcrypt
 from src.models import User, db
 from src.routes import login_manager, oauth, register_routes
 from src.config import Config
-from src.db import executor
+from src.db import rq
 
 sess = Session()
 
@@ -26,7 +26,7 @@ def create_app() -> Flask:
     login_manager.init_app(app)
     sess.init_app(app)
     oauth.init_app(app)
-    executor.init_app(app)
+    rq.init_app(app)
 
     register_routes(app)
     oauth.register("lichess", client_kwargs={"code_challenge_method": "S256"})

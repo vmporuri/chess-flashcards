@@ -1,16 +1,17 @@
 from io import TextIOWrapper
 from typing import Optional
 
+from flask_rq2 import RQ
 from sqlalchemy import func
+
 from src.models import LichessUser, Puzzle, db
 from src.puzzle_generator.generate_puzzles import generate_puzzles
 from src.puzzle_generator.lichess_api import stream_games
-from flask_executor import Executor
 
 ONE_SECOND_IN_MS = 1000
 DEFAULT_TIMESTAMP = 1356998400070
 
-executor = Executor()
+rq = RQ()
 
 
 def fetch_random_puzzle_fen(user_id: int) -> tuple[str, str]:
@@ -22,6 +23,7 @@ def fetch_random_puzzle_fen(user_id: int) -> tuple[str, str]:
     return puzzle.fen, puzzle.solution
 
 
+@rq.job
 def add_puzzles_to_db(lichess_user: LichessUser) -> None:
     """Fetches any new games played by LICHESS_USER and adds generated puzzles to DB."""
     if (recent_puzzle := find_newest_puzzle(lichess_user)) is not None:

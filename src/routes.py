@@ -8,7 +8,7 @@ from flask_login import (
     logout_user,
 )
 from src.auth import add_oauth_token, register_new_user, verify_login_credentials
-from src.db import add_puzzles_to_db, fetch_random_puzzle_fen, executor
+from src.db import add_puzzles_to_db, fetch_random_puzzle_fen
 
 oauth = OAuth()
 login_manager = LoginManager()
@@ -74,7 +74,7 @@ def register_routes(app: Flask) -> None:
             token=token["access_token"],
             expires=token["expires_at"],
         )
-        executor.submit(add_puzzles_to_db, current_user.lichess_user)
+        add_puzzles_to_db.queue(current_user.lichess_user)
         flash("Linked account successfully!", "info")
         return redirect(url_for("profile"))
 
@@ -116,6 +116,8 @@ def register_routes(app: Flask) -> None:
     @login_required
     def logout():
         """Logs out the user, ending their session."""
+        session.pop("fen", None)
+        session.pop("solution", None)
         logout_user()
         flash("Logged out Successfully", "info")
         return redirect(url_for("index"))
