@@ -34,10 +34,13 @@ def register_routes(app: Flask) -> None:
     @login_required
     def get_fen():
         """Retrieves a random puzzle fen from the database."""
+        print(f"FEN in session: {'fen' in session}")
         if "fen" not in session or not session["fen"]:
             fen, solution = fetch_random_puzzle_fen(current_user.user_id)
+            print(fen)
             session["fen"] = fen
             session["solution"] = solution
+        print(session["fen"])
         return {"fen": session["fen"]}
 
     @app.post("/validate-move")

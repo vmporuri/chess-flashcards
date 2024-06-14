@@ -33,11 +33,9 @@ def create_app() -> Flask:
 
     login_manager.login_view = "login_get"
 
-    with app.app_context():
-        db.create_all()
-
     @login_manager.user_loader
     def load_user(user_id) -> Optional[User]:
+        """Retrieves the User mapped object corresponding to primary key USER_ID."""
         return db.session.get(User, user_id)
 
     return app

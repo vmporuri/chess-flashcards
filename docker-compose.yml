@@ -1,0 +1,36 @@
+name: chess-flashcards
+
+services:
+  redis:
+    image: redis:7.4-rc-alpine
+    volumes:
+        - redis-data:/data
+
+  flask:
+    build: .
+    image: vmporuri/chess-flashcards-flask-app
+    environment:
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+    volumes:
+      - flask-app:/app
+    ports:
+      - "8000:8000"
+    depends_on:
+      - redis
+
+  rq-worker:
+    image: vmporuri/chess-flashcards-flask-app
+    environment:
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+    volumes:
+      - flask-app:/app
+    command: flask rq worker
+    depends_on:
+      - redis
+      - flask
+
+volumes:
+  redis-data:
+  flask-app:
