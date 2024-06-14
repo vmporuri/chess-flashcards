@@ -3,6 +3,7 @@ docker-compose*
 .dockerignore
 .git
 .gitignore
+.gitattributes
 README.md
 LICENSE
 __pycache__

@@ -3,6 +3,7 @@ WORKDIR /app
 EXPOSE 8000
 ENV PYTHONPATH "." 
 COPY requirements.txt /app
+COPY crontab /etc/cronjob
 RUN apk add --no-cache gcc=13.2.1_git20240309-r0 musl-dev=1.2.5-r0 \
     libffi-dev=3.4.6-r0 && \
     pip install --no-cache-dir -r requirements.txt && \

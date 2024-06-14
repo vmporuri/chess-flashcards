@@ -5,15 +5,6 @@ Flask web app that automatically generates chess flashcards from mistakes in you
 ## Commands
 
 ```bash
-# App setup
-flask create-db
-python -c 'import uuid; print(f"LICHESS_CLIENT_ID=\"{uuid.uuid4()}\"")' >> .env
-python -c 'import secrets; print(f"SECRET_KEY=\"{secrets.token_hex()}\"")' >> .env
-
-# Start command
-gunicorn -w 4 'src.run:app'
-
-# Cron tasks
-flask session_cleanup
-flask refresh-puzzles
+docker build -t vmporuri/chess-flashcards-flask-app .
+docker-compose up
 ```

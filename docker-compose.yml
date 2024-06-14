@@ -31,6 +31,14 @@ services:
       - redis
       - flask
 
+  cron-worker:
+    image: vmporuri/chess-flashcards-flask-app
+    volumes:
+      - flask-app:/app
+    command: sh -c 'crontab /etc/cronjob && crond -f'
+    depends_on:
+      - flask
+
 volumes:
   redis-data:
   flask-app:
